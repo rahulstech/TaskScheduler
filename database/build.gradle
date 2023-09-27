@@ -1,20 +1,25 @@
 plugins {
-    id 'com.android.application'
+    id 'com.android.library'
 }
 
 android {
-    namespace 'rahulstech.android.taskschedulder'
+    namespace 'rahulstech.android.database'
     compileSdk 32
 
     defaultConfig {
-        applicationId "rahulstech.android.taskschedulder"
         minSdk 21
         //noinspection OldTargetApi
         targetSdk 32
-        versionCode 1
-        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+        
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
+
     }
 
     buildTypes {
@@ -30,10 +35,13 @@ android {
 }
 
 dependencies {
+    def roomVersion = "2.4.3"
+    def lifeCycleVersion = "2.5.1"
 
-    api project(path: ':ui')
-    implementation 'com.google.android.material:material:1.9.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation "androidx.lifecycle:lifecycle-livedata-core:$lifeCycleVersion"
+    annotationProcessor "androidx.room:room-compiler:$roomVersion"
+    api "androidx.room:room-runtime:$roomVersion"
+    androidTestImplementation "androidx.room:room-testing:$roomVersion"
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
