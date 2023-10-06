@@ -11,7 +11,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import rahulstech.android.database.datatype.DurationUnit;
+import rahulstech.android.database.datatype.TimeUnit;
 import rahulstech.android.ui.R;
 
 public class DialogRemindBefore extends AlertDialog {
@@ -24,7 +24,7 @@ public class DialogRemindBefore extends AlertDialog {
 
     boolean mIsRemindBefore;
     int mRemindBefore;
-    DurationUnit mBeforeUnit;
+    TimeUnit mBeforeUnit;
 
     OnClickSaveListener mSaveListener;
 
@@ -48,19 +48,19 @@ public class DialogRemindBefore extends AlertDialog {
         mSaveListener = listener;
     }
 
-    public DurationUnit getSelectedDurationUnit() {
+    public TimeUnit getSelectedDurationUnit() {
         switch (iBeforeUnit.getSelectedItemPosition()) {
-            case 1: return DurationUnit.HOUR;
-            case 2: return DurationUnit.DAY;
-            default: return DurationUnit.MINUTE;
+            case 1: return TimeUnit.HOUR;
+            case 2: return TimeUnit.DAY;
+            default: return TimeUnit.MINUTE;
         }
     }
 
-    public int getSelectionForDurationUnit(DurationUnit unit) {
-        if (unit == DurationUnit.HOUR) {
+    public int getSelectionForDurationUnit(TimeUnit unit) {
+        if (unit == TimeUnit.HOUR) {
             return 1;
         }
-        else if (unit == DurationUnit.DAY) {
+        else if (unit == TimeUnit.DAY) {
             return 2;
         }
         else {
@@ -73,7 +73,7 @@ public class DialogRemindBefore extends AlertDialog {
         update();
     }
 
-    public void setRemindBefore(int before, @NonNull DurationUnit unit) {
+    public void setRemindBefore(int before, @NonNull TimeUnit unit) {
         mRemindBefore = before;
         mBeforeUnit = unit;
         update();
@@ -88,7 +88,7 @@ public class DialogRemindBefore extends AlertDialog {
         else {
             mRemindOptions.check(R.id.btn_remind_on_time);
             iRemindBefore.setText(String.valueOf(mRemindBefore));
-            iBeforeUnit.setSelection(getSelectionForDurationUnit(DurationUnit.MINUTE));
+            iBeforeUnit.setSelection(getSelectionForDurationUnit(TimeUnit.MINUTE));
         }
     }
 
@@ -111,10 +111,10 @@ public class DialogRemindBefore extends AlertDialog {
         }
         else {
             int before;
-            DurationUnit unit;
+            TimeUnit unit;
             if (mRemindOptions.getCheckedRadioButtonId() == R.id.btn_remind_on_time) {
                 before = 0;
-                unit = DurationUnit.MINUTE;
+                unit = TimeUnit.MINUTE;
             }
             else {
                 CharSequence txtBefore = iRemindBefore.getText();
@@ -135,6 +135,6 @@ public class DialogRemindBefore extends AlertDialog {
 
     public interface OnClickSaveListener {
 
-        void onClickSave(boolean addReminder, int before, DurationUnit unit);
+        void onClickSave(boolean addReminder, int before, TimeUnit unit);
     }
 }

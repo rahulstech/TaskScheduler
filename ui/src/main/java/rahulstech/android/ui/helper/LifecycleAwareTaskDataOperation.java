@@ -8,14 +8,13 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LifecycleEventObserver;
 import androidx.lifecycle.LifecycleOwner;
 import rahulstech.android.database.entity.TaskData;
 import rahulstech.android.database.model.TaskModel;
 
 @SuppressWarnings("unused")
-public abstract class AbsTaskDataOperation extends ContextWrapper {
+public abstract class LifecycleAwareTaskDataOperation extends ContextWrapper {
 
     private final LifecycleEventObserver mObserver = (source, event) -> {
         switch (event) {
@@ -29,13 +28,31 @@ public abstract class AbsTaskDataOperation extends ContextWrapper {
         }
     };
 
-    public AbsTaskDataOperation(@NonNull AppCompatActivity activity) {
-        this(activity,activity);
+    private LifecycleOwner mLifecycleOwner;
+
+    private TaskModel mTask;
+
+    public LifecycleAwareTaskDataOperation(@NonNull Context context) {
+        super(context);
     }
 
-    public AbsTaskDataOperation(@NonNull Context base, @NonNull LifecycleOwner owner) {
-        super(base);
+    public void setLifecycleOwner(@NonNull LifecycleOwner owner) {
+        mLifecycleOwner = owner;
         owner.getLifecycle().addObserver(mObserver);
+        onInit();
+    }
+
+    @NonNull
+    public LifecycleOwner getLifeCycleOwner() {
+        return mLifecycleOwner;
+    }
+
+    public void setTask(@NonNull TaskModel task) {
+        this.mTask = task;
+    }
+
+    public TaskModel getTask() {
+        return mTask;
     }
 
     @NonNull
@@ -43,34 +60,34 @@ public abstract class AbsTaskDataOperation extends ContextWrapper {
         return ifNull;
     }
 
+    protected void onInit() {}
+
     protected void onPause() {}
 
     protected void onResume() {}
 
-    public void addData(@NonNull TaskModel task) {
-        onAddSingleData(null);
+    public void addData() {
+        throw new RuntimeException("addData() not implemented");
     }
 
-    public void addMultipleData(@NonNull TaskModel task) {
-        onAddMultipleData(Collections.emptyList());
+    public void addMultipleData() {
+        throw new RuntimeException("addData() not implemented");
     }
 
     public void setData(@NonNull TaskData oldData) {
-        onSetSingleData(oldData);
+        throw new RuntimeException("addData() not implemented");
     }
 
     public void setMultipleData(@NonNull List<TaskData> oldData) {
-        onSetMultipleData(oldData);
+        throw new RuntimeException("addData() not implemented");
     }
 
-
-
     public void removeData(@NonNull TaskData oldData) {
-        onRemoveSingleDate(oldData);
+        throw new RuntimeException("addData() not implemented");
     }
 
     public void removeMultipleData(@NonNull List<TaskData> oldData) {
-        onRemoveMultipleData(oldData);
+        throw new RuntimeException("addData() not implemented");
     }
 
     protected void onAddSingleData(@NonNull TaskData data) {
@@ -107,9 +124,7 @@ public abstract class AbsTaskDataOperation extends ContextWrapper {
         }
     }
 
-    protected void onSingleRemoveSuccessful(@NonNull TaskData data) {
-
-    }
+    protected void onSingleRemoveSuccessful(@NonNull TaskData data) {}
 
     protected void onRemoveError(@Nullable Exception error) {}
 }

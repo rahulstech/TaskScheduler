@@ -6,13 +6,14 @@ import androidx.annotation.NonNull;
 import androidx.room.RoomWarnings;
 import androidx.room.TypeConverters;
 import rahulstech.android.database.datatype.DBDate;
+import rahulstech.android.database.datatype.DBTime;
 import rahulstech.android.database.datatype.DatatypeConverters;
 import rahulstech.android.database.datatype.TaskState;
 
 @SuppressWarnings(value = {"unused", RoomWarnings.CURSOR_MISMATCH})
 public class TaskModel {
 
-    private long id;
+    private Long id;
 
     @TypeConverters(DatatypeConverters.class)
     private DBDate dateStart;
@@ -21,13 +22,15 @@ public class TaskModel {
 
     private String description;
 
+    private DBTime timeStart;
+
     public TaskModel() {}
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -55,6 +58,14 @@ public class TaskModel {
         this.description = description;
     }
 
+    public DBTime getTimeStart() {
+        return timeStart;
+    }
+
+    public void setTimeStart(DBTime timeStart) {
+        this.timeStart = timeStart;
+    }
+
     @NonNull
     @Override
     public String toString() {
@@ -63,6 +74,7 @@ public class TaskModel {
                 ", dateStart=" + dateStart +
                 ", state=" + state +
                 ", description='" + description + '\'' +
+                ", timeStart=" + timeStart +
                 '}';
     }
 
@@ -71,11 +83,22 @@ public class TaskModel {
         if (this == o) return true;
         if (!(o instanceof TaskModel)) return false;
         TaskModel taskModel = (TaskModel) o;
-        return id == taskModel.id && Objects.equals(dateStart, taskModel.dateStart) && state == taskModel.state && Objects.equals(description, taskModel.description);
+        return Objects.equals(id, taskModel.id) && Objects.equals(dateStart, taskModel.dateStart) && state == taskModel.state && Objects.equals(description, taskModel.description) && Objects.equals(timeStart, taskModel.timeStart);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, dateStart, state, description);
+        return Objects.hash(id, dateStart, state, description, timeStart);
+    }
+
+    @NonNull
+    public TaskModel copy() {
+        TaskModel copy = new TaskModel();
+        copy.id = id;
+        copy.description = description;
+        copy.dateStart = dateStart;
+        copy.state = state;
+        copy.timeStart = timeStart;
+        return copy;
     }
 }

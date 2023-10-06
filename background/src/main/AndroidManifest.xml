@@ -2,12 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
-        <receiver
-            android:name=".receiver.AlarmReceiver"
-            android:enabled="true"
-            android:exported="false">
-
-        </receiver>
 
         <receiver
             android:name=".receiver.BootReceiver"
@@ -15,16 +9,17 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <category android:name="android.intent.category.DEFAULT"/>
+
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
 
         <service
-            android:name=".service.SetAlarmsOnBootService"
-            android:enabled="true"
+            android:name=".service.SchedulerService"
             android:exported="false">
 
         </service>
+
     </application>
 
 </manifest>

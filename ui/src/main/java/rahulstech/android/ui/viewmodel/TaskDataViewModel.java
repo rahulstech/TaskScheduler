@@ -6,18 +6,21 @@ import android.app.Application;
 import java.util.List;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.AndroidViewModel;
 import rahulstech.android.database.SchedulerDB;
 import rahulstech.android.database.dao.TaskDataDao;
 import rahulstech.android.database.entity.TaskData;
-import rahulstech.android.util.concurrent.AsyncTasksManager;
 import rahulstech.android.util.concurrent.ListenableAsyncTask;
 
-public class TaskDataViewModel extends AndroidViewModel {
+@SuppressLint({"StaticFieldLeak","unused"})
+public class TaskDataViewModel extends BaseViewModel {
+
+    public static final String TAG_REMOVE_TASK_DATA = "removeTaskData";
+
+    public static final String TAG_SET_TASK_DATA = "setTaskData";
+
+    public static final String TAG_ADD_TASK_DATA = "addTaskData";
 
     private final TaskDataDao mDao;
-
-    private final AsyncTasksManager mTaskManager = new AsyncTasksManager();
 
     public TaskDataViewModel(@NonNull Application application) {
         super(application);
@@ -27,15 +30,12 @@ public class TaskDataViewModel extends AndroidViewModel {
     }
 
     @NonNull
-    public AsyncTasksManager getAsyncTaskManaget() {
-        return mTaskManager;
+    public TaskDataDao getTaskDataDao() {
+        return mDao;
     }
 
-
-    @SuppressLint("StaticFieldLeak")
-    public ListenableAsyncTask<Void,Void, List<TaskData>> addTaskData(@NonNull List<TaskData> data) {
-        return new ListenableAsyncTask<Void, Void, List<TaskData>>(getAsyncTaskManaget()) {
-
+    public void addTaskData(@NonNull List<TaskData> data) {
+        new ListenableAsyncTask<Void, Void, List<TaskData>>(getAsyncTaskManager(),TAG_ADD_TASK_DATA) {
             @Override
             protected List<TaskData> onExecuteInBackground(Void... voids) throws Exception {
                 long[] ids = mDao.insertTaskData(data);
@@ -47,34 +47,32 @@ public class TaskDataViewModel extends AndroidViewModel {
                 }
                 throw new RuntimeException("unable to insert tasks="+data);
             }
-        };
+        }.start();
     }
 
-    @SuppressLint("StaticFieldLeak")
-    public ListenableAsyncTask<Void,Void, List<TaskData>> setTaskData(@NonNull List<TaskData> data) {
-        return new ListenableAsyncTask<Void, Void, List<TaskData>>(getAsyncTaskManaget()) {
+    public void setTaskData(@NonNull List<TaskData> data) {
+        new ListenableAsyncTask<Void, Void, List<TaskData>>(getAsyncTaskManager(),TAG_SET_TASK_DATA) {
             @Override
             protected List<TaskData> onExecuteInBackground(Void... voids) throws Exception {
                 int changes = mDao.updateTaskData(data);
                 if (changes == data.size()) {
                     return data;
                 }
-                throw new RuntimeException("unable to update tasks="+data);
+                throw new RuntimeException("unable to update task-data="+data);
             }
-        };
+        }.start();
     }
 
-    @SuppressLint("StaticFieldLeak")
-    public ListenableAsyncTask<Void,Void, List<TaskData>> removeTaskData(@NonNull List<TaskData> data) {
-        return new ListenableAsyncTask<Void, Void, List<TaskData>>(getAsyncTaskManaget()) {
+    public void removeTaskData(@NonNull List<TaskData> data) {
+        new ListenableAsyncTask<Void, Void, List<TaskData>>(getAsyncTaskManager(),TAG_REMOVE_TASK_DATA) {
             @Override
             protected List<TaskData> onExecuteInBackground(Void... voids) throws Exception {
                 int changes = mDao.deleteTaskData(data);
                 if (changes == data.size()) {
                     return data;
                 }
-                throw new RuntimeException("unable to delete tasks="+data);
+                throw new RuntimeException("unable to delete task-data="+data);
             }
-        };
+        }.start();
     }
 }

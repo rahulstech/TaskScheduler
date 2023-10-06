@@ -15,7 +15,7 @@ class FakeDataProvider1 extends FakeDataProvider {
                 "VALUES (1,\"Task 1\",\"2023-04-06\",\"COMPLETE\");");
 
         db.execSQL("INSERT INTO `tasks` (`id`,`description`,`dateStart`,`state`) " +
-                "VALUES (2,\"Task 2\",\"2023-04-07\",\"08:00:00\",\"CANCEL\");");
+                "VALUES (2,\"Task 2\",\"2023-04-07\",\"CANCEL\");");
 
         db.execSQL("INSERT INTO `tasks` (`id`,`description`,`dateStart`,`state`) " +
                 "VALUES (3,\"Task 3\",\"2023-04-08\",\"PAUSE\");");

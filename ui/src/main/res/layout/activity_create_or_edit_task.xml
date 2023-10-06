@@ -9,10 +9,10 @@
     <LinearLayout android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:orientation="vertical"
-        android:paddingTop="18dp"
-        android:paddingBottom="18dp"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp">
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
 
 
         <com.google.android.material.textfield.TextInputLayout
@@ -23,7 +23,6 @@
             app:hintAnimationEnabled="true"
             app:counterEnabled="true"
             app:counterMaxLength="@integer/max_task_description_length"
-            android:layout_marginBottom="16dp"
             app:errorEnabled="true"
             app:endIconMode="clear_text"
             app:endIconDrawable="@drawable/ic_baseline_cancel_24">
@@ -41,18 +40,29 @@
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:background="@drawable/background_rounded_border"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="24dp"
-            android:paddingTop="12dp"
-            android:paddingBottom="8dp"
-            android:paddingStart="6dp"
-            android:paddingEnd="6dp"
+            android:layout_marginTop="18dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
             android:maxLines="2"
             android:textAlignment="center"
             app:drawableEndCompat="@drawable/ic_baseline_calendar_month_24"
-            android:drawablePadding="12dp"
-            android:clickable="true"
-            android:focusable="true"/>
+            android:drawablePadding="12dp" />
+
+        <TextView android:id="@+id/task_time_start"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:background="@drawable/background_rounded_border"
+            android:layout_marginTop="18dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:maxLines="2"
+            android:textAlignment="center"
+            app:drawableEndCompat="@drawable/ic_baseline_clock_filled_24"
+            android:drawablePadding="12dp" />
 
 
         <LinearLayout
@@ -60,20 +70,15 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="24dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp">
+            android:layout_marginTop="18dp">
 
             <Button
                 android:id="@+id/btnClear"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingTop="12dp"
-                android:paddingBottom="12dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
+                android:padding="12dp"
+                android:layout_marginEnd="10dp"
                 android:text="@string/label_clear" />
 
             <Button
@@ -81,15 +86,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingTop="12dp"
-                android:paddingBottom="12dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
+                android:padding="8dp"
                 android:text="@string/label_save"/>
 
         </LinearLayout>
-
-
-
     </LinearLayout>
 </ScrollView>

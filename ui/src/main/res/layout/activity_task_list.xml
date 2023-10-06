@@ -11,13 +11,35 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/btn_previous"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            app:shapeAppearance="@style/RoundShapedButton"
+            android:layout_margin="10dp"
+            app:srcCompat="@drawable/ic_baseline_arrow_left_48"
+            android:background="?attr/selectableItemBackground"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/btn_next"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="10dp"
+            app:shapeAppearanceOverlay="@style/RoundShapedButton"
+            app:srcCompat="@drawable/ic_baseline_arrow_right_48"
+            android:background="?attr/selectableItemBackground"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
         <TextView
             android:id="@+id/task_date"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/btn_previous"
+            app:layout_constraintEnd_toStartOf="@id/btn_next"
             app:drawableEndCompat="@drawable/ic_baseline_calendar_month_24"
             android:drawablePadding="12dp"
             android:background="@drawable/background_rounded_border"

@@ -5,8 +5,8 @@ import java.util.Date;
 import java.util.Locale;
 
 import androidx.annotation.NonNull;
+import rahulstech.android.database.util.DBDateTimeUtil;
 
-import static rahulstech.android.database.util.DBDateTimeUtil.format;
 import static rahulstech.android.database.util.DBDateTimeUtil.parse;
 
 @SuppressWarnings(value = {"unused"})
@@ -58,9 +58,14 @@ public class DBTime {
     }
 
     @NonNull
+    public String format(@NonNull String pattern) {
+        return DBDateTimeUtil.format(mCalendar.getTime(),pattern);
+    }
+
+    @NonNull
     @Override
     public String toString() {
-        return format(mCalendar.getTime(),TIME_PATTERN);
+        return DBDateTimeUtil.format(mCalendar.getTime(),TIME_PATTERN);
     }
 
     @Override

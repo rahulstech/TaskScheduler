@@ -3,28 +3,20 @@ package rahulstech.android.ui.adapter;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import rahulstech.android.ui.listener.OnClickItemOrChildListener;
-import rahulstech.android.ui.listener.OnItemCheckChangeListener;
+import rahulstech.android.ui.listener.OnItemOrChildCheckChangeListener;
 
 @SuppressWarnings("unused")
-public abstract class ClickableViewHolder<I> extends RecyclerView.ViewHolder {
-
-    private final RecyclerView.Adapter<?> mAdapter;
+public abstract class ClickableViewHolder<I> extends BaseViewHolder<I> {
 
     private OnClickItemOrChildListener mItemOrChildClick;
 
-    private OnItemCheckChangeListener mItemCheckChange;
+    private OnItemOrChildCheckChangeListener mItemCheckChange;
 
     public ClickableViewHolder(@NonNull RecyclerView.Adapter<?> adapter, @NonNull View itemView) {
         super(itemView);
-        mAdapter = adapter;
-    }
-
-    @NonNull
-    public RecyclerView.Adapter<?> getAdapter() {
-        return mAdapter;
+        setAdapter(adapter);
     }
 
     public void setOnClickItemOrChildClickListener(OnClickItemOrChildListener listener) {
@@ -35,26 +27,13 @@ public abstract class ClickableViewHolder<I> extends RecyclerView.ViewHolder {
         return mItemOrChildClick;
     }
 
-    public OnItemCheckChangeListener getOnItemCheckChangeListener() {
+    public OnItemOrChildCheckChangeListener getOnItemCheckChangeListener() {
         return mItemCheckChange;
     }
 
-    public void setOnItemCheckChangeListener(OnItemCheckChangeListener listener) {
+    public void setOnItemOrChildCheckChangeListener(OnItemOrChildCheckChangeListener listener) {
         mItemCheckChange = listener;
     }
-
-    public void bind(@Nullable I item) {
-        if (null == item) {
-            bindNull();
-        }
-        else {
-            bindNonNull(item);
-        }
-    }
-
-    protected abstract void bindNull();
-
-    protected abstract void bindNonNull(@NonNull I item);
 
     protected void onClick(View v) {
         if (null == mItemOrChildClick) return;

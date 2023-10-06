@@ -11,11 +11,9 @@ import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import rahulstech.android.database.datatype.TaskState;
-import rahulstech.android.database.entity.Task;
 import rahulstech.android.database.model.TaskModel;
 import rahulstech.android.ui.R;
 import rahulstech.android.ui.adapter.TaskListAdapter;
@@ -24,7 +22,7 @@ import rahulstech.android.ui.viewmodel.TaskListViewModel;
 import rahulstech.android.util.time.DateTime;
 
 @SuppressWarnings(value = {"unused"})
-public class TaskListActivity extends AppCompatActivity implements OnClickItemOrChildListener {
+public class TaskListActivity extends AppCompatActivity {
 
     private static final String TAG = "TaskListActivity";
 
@@ -43,7 +41,7 @@ public class TaskListActivity extends AppCompatActivity implements OnClickItemOr
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mViewModel = new ViewModelProvider((ViewModelStoreOwner) this,
+        mViewModel = new ViewModelProvider(this,
                 (ViewModelProvider.Factory) new ViewModelProvider.AndroidViewModelFactory())
                 .get(TaskListViewModel.class);
 
@@ -53,17 +51,24 @@ public class TaskListActivity extends AppCompatActivity implements OnClickItemOr
         mTasksList = findViewById(R.id.tasks);
 
         mBtnTaskDate.setOnClickListener(v->onClickPickTaskDate());
+        findViewById(R.id.btn_previous).setOnClickListener(v-> onClickPreviousDate());
+        findViewById(R.id.btn_next).setOnClickListener(v->onClickNextDate());
         findViewById(R.id.add_task).setOnClickListener(v->onClickAddTask());
         setTaskDate(DateTime.today());
 
         mTasksList.setLayoutManager(new LinearLayoutManager(this,RecyclerView.VERTICAL,false));
         mAdapter = new TaskListAdapter(this);
-        mAdapter.setOnItemCheckChangeListener((adapter, position, checked, view) -> onTaskCheckedChanged(position,checked));
-        mAdapter.setOnClickItemOrChildClickListener(this); // TODO: change this
+        mAdapter.setOnItemOrChildCheckChangeListener((adapter, position, checked, view) -> onTaskCheckedChanged(position,checked));
+        mAdapter.setOnClickItemOrChildClickListener(new OnClickItemOrChildListener() {
+            @Override
+            public void onClickItem(@NonNull RecyclerView.Adapter<?> adapter, int position) {
+                onClickTask(position);
+            }
+
+            @Override
+            public void onClickItemChild(@NonNull RecyclerView.Adapter<?> adapter, int position, @NonNull View child) {}
+        });
         mTasksList.setAdapter(mAdapter);
-        //RecyclerViewItemListener itemListener = new RecyclerViewItemListener(mTasksList);
-        //itemListener.setOnItemClickListener((rv, position) -> onClickTask(position));
-        //mTasksList.addOnItemTouchListener(itemListener);
 
         mViewModel.getAllTasksForDate().observe(this, this::onTasksFetched);
         mViewModel.changeTaskDate(getTaskDate());
@@ -82,27 +87,29 @@ public class TaskListActivity extends AppCompatActivity implements OnClickItemOr
         outState.putString(KEY_TASK_DATE,mTaskDate.formatISODate());
     }
 
-    @Override
-    public void onClickItem(@NonNull RecyclerView.Adapter<?> adapter, int position) {
-        onClickTask(position);
-    }
-
-    @Override
-    public void onClickItemChild(@NonNull RecyclerView.Adapter<?> adapter, int position, @NonNull View child) {
-
-    }
-
     void onClickPickTaskDate() {
-        DatePickerDialog picker = new DatePickerDialog(this,(di,year,month,date)->{
-            setTaskDate(DateTime.ofDate(year,month,date));
-            mViewModel.changeTaskDate(mTaskDate);
-        }, mTaskDate.getYear(),mTaskDate.getMonth(),mTaskDate.getDate());
+        DatePickerDialog picker = new DatePickerDialog(this,(di,year,month,date)->
+                onChangeTaskDate(DateTime.ofDate(year,month,date)),
+                mTaskDate.getYear(),mTaskDate.getMonth(),mTaskDate.getDate());
         picker.show();
     }
 
-    void setTaskDate(DateTime date) {
+    void onClickPreviousDate() {
+        onChangeTaskDate(mTaskDate.addDays(-1));
+    }
+
+    void onClickNextDate() {
+        onChangeTaskDate(mTaskDate.addDays(1));
+    }
+
+    void onChangeTaskDate(@NonNull DateTime newDate) {
+        setTaskDate(newDate);
+        mViewModel.changeTaskDate(mTaskDate);
+    }
+
+    void setTaskDate(@NonNull DateTime date) {
         mTaskDate = date;
-        String text = null == date ? "" : date.format("dd-MMM-yyyy");
+        String text = date.format("dd-MMM-yyyy");
         mBtnTaskDate.setText(text);
     }
 
@@ -111,7 +118,7 @@ public class TaskListActivity extends AppCompatActivity implements OnClickItemOr
     }
 
     void onTasksFetched(List<TaskModel> tasks) {
-        mAdapter.submitList(tasks);
+        mAdapter.setItems(tasks);
         if (null != tasks && !tasks.isEmpty()) {
             mEmptyLabel.setVisibility(View.GONE);
             mTasksList.setVisibility(View.VISIBLE);
@@ -130,21 +137,16 @@ public class TaskListActivity extends AppCompatActivity implements OnClickItemOr
     }
 
     void onClickTask(int position) {
-        TaskModel task = mAdapter.getItem(position);
+        TaskModel task = (TaskModel) mAdapter.getAdapterData(position);
         if (null == task) return;
         Intent i = new Intent(this,ViewTask.class);
         i.putExtra(ViewTask.EXTRA_TASK_ID,task.getId());
         startActivity(i);
     }
 
-    void onTaskCheckedChanged(int position, boolean checked) {
-        TaskModel model = mAdapter.getItem(position);
-        if (null == model) return;
-        Task task = new Task();
-        task.setId(model.getId());
-        task.setDescription(model.getDescription());
-        task.setState(checked ? TaskState.COMPLETE : TaskState.CREATE);
-        task.setDateStart(model.getDateStart());
-        mViewModel.editTask(task).start(1);
+    void onTaskCheckedChanged(int adapterPosition, boolean checked) {
+        TaskModel model = (TaskModel) mAdapter.getAdapterData(adapterPosition);
+        TaskState newState = checked ? TaskState.COMPLETE : TaskState.PENDING;
+        mViewModel.changeTaskState(model,newState);
     }
 }

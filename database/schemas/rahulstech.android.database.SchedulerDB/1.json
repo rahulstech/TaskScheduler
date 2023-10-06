@@ -1,0 +1,192 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "8979ea6f046cbbfc005cc772f5bd5f4e",
+    "entities": [
+      {
+        "tableName": "tasks",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `dateStart` TEXT NOT NULL, `state` TEXT NOT NULL, `description` TEXT NOT NULL, `timeStart` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dateStart",
+            "columnName": "dateStart",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "state",
+            "columnName": "state",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeStart",
+            "columnName": "timeStart",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "task_data",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `taskId` INTEGER NOT NULL, `type` TEXT NOT NULL, `text1` TEXT, `text2` TEXT, `text3` TEXT, `text4` TEXT, `text5` TEXT, `date1` TEXT, `date2` TEXT, `time1` TEXT, `time2` TEXT, `long1` INTEGER, `long2` INTEGER, `double1` REAL, `double2` REAL, `boolean1` INTEGER, `boolean2` INTEGER, FOREIGN KEY(`taskId`) REFERENCES `tasks`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "taskId",
+            "columnName": "taskId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "text1",
+            "columnName": "text1",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "text2",
+            "columnName": "text2",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "text3",
+            "columnName": "text3",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "text4",
+            "columnName": "text4",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "text5",
+            "columnName": "text5",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "date1",
+            "columnName": "date1",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "date2",
+            "columnName": "date2",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "time1",
+            "columnName": "time1",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "time2",
+            "columnName": "time2",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "long1",
+            "columnName": "long1",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "long2",
+            "columnName": "long2",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "double1",
+            "columnName": "double1",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "double2",
+            "columnName": "double2",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "boolean1",
+            "columnName": "boolean1",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "boolean2",
+            "columnName": "boolean2",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "tasks",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "taskId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8979ea6f046cbbfc005cc772f5bd5f4e')"
+    ]
+  }
+}

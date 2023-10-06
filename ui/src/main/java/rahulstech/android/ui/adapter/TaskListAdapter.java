@@ -1,7 +1,6 @@
 package rahulstech.android.ui.adapter;
 
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -11,38 +10,23 @@ import android.widget.TextView;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.DiffUtil;
-import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import rahulstech.android.database.datatype.TaskState;
 import rahulstech.android.database.model.TaskModel;
 import rahulstech.android.ui.R;
 import rahulstech.android.ui.listener.OnClickItemOrChildListener;
-import rahulstech.android.ui.listener.OnItemCheckChangeListener;
-import rahulstech.android.ui.util.TextUtil;
+import rahulstech.android.ui.listener.OnItemOrChildCheckChangeListener;
+import rahulstech.android.util.text.SpannableTextBuilder;
 
 @SuppressWarnings(value = {"unused"})
-public class TaskListAdapter extends ListAdapter<TaskModel, RecyclerView.ViewHolder> {
+public class TaskListAdapter
+        extends SectionedAdapter<TaskListAdapter.Header,TaskModel,
+        TaskListAdapter.HeaderViewHolder, TaskListAdapter.TaskViewHolder> {
 
     private static final String TAG = "TaskListAdapter";
-
-    private static final int TYPE_HEADER = 1;
-    private static final int TYPE_TASK = 2;
-
-    private static final DiffUtil.ItemCallback<TaskModel> DIFF_CALLBACK = new DiffUtil.ItemCallback<TaskModel>() {
-        @Override
-        public boolean areItemsTheSame(@NonNull TaskModel oldItem, @NonNull TaskModel newItem) {
-            return oldItem.getId() == newItem.getId();
-        }
-
-        @Override
-        public boolean areContentsTheSame(@NonNull TaskModel oldItem, @NonNull TaskModel newItem) {
-            return oldItem.equals(newItem);
-        }
-    };
 
     private final Comparator<TaskModel> mStateComparator = (l,r) -> {
         int lCode = getStateCode(l.getState());
@@ -50,38 +34,23 @@ public class TaskListAdapter extends ListAdapter<TaskModel, RecyclerView.ViewHol
         return lCode-rCode;
     };
 
-    private final Context mContext;
-    private final LayoutInflater mInflater;
+    private OnItemOrChildCheckChangeListener mCheckListener;
 
-    //private List<String> mSections;
-    //private List<Integer> mSectionPositions;
-
-    private OnItemCheckChangeListener mItemCheckListener;
-
-    private OnClickItemOrChildListener mItemOrChildCLickListener;
+    private OnClickItemOrChildListener mCLickListener;
 
     public TaskListAdapter(@NonNull Context context) {
-        super(DIFF_CALLBACK);
-        mContext = context;
-        mInflater = LayoutInflater.from(context);
+        super(context);
     }
 
-    public void setOnItemCheckChangeListener(OnItemCheckChangeListener listener) {
-        mItemCheckListener = listener;
+    public void setOnItemOrChildCheckChangeListener(OnItemOrChildCheckChangeListener listener) {
+        mCheckListener = listener;
     }
 
     public void setOnClickItemOrChildClickListener(OnClickItemOrChildListener listener) {
-        this.mItemOrChildCLickListener = listener;
+        this.mCLickListener = listener;
     }
 
-    @Override
-    public void submitList(@Nullable List<TaskModel> list) {
-        List<TaskModel> sortedList = sort(list);
-        //createSections(sortedList);
-        super.submitList(sortedList);
-    }
-
-    public List<TaskModel> sort(List<TaskModel> list) {
+    private List<TaskModel> sort(List<TaskModel> list) {
         if (null == list) return null;
         Collections.sort(list,mStateComparator);
         return list;
@@ -89,115 +58,65 @@ public class TaskListAdapter extends ListAdapter<TaskModel, RecyclerView.ViewHol
 
     @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        /*if (TYPE_TASK == viewType) {
-            View itemView = mInflater.inflate(R.layout.task_list_item,parent,false);
-            return new TaskViewHolder(itemView);
-        }
-        else {
-            View headerView = mInflater.inflate(R.layout.task_list_section_header,parent,false);
-            return new HeaderViewHolder(headerView);
-        }*/
-        View itemView = mInflater.inflate(R.layout.task_list_item,parent,false);
-        TaskViewHolder holder = new TaskViewHolder(this,itemView);
-        holder.setOnItemCheckChangeListener(mItemCheckListener);
-        holder.setOnClickItemOrChildClickListener(mItemOrChildCLickListener);
-        return holder;
+    protected HeaderViewHolder onCreateHeaderViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View headerView = getLayoutInflater().inflate(R.layout.task_list_section_header,parent,false);
+        return new HeaderViewHolder(headerView);
+
+    }
+
+    @NonNull
+    @Override
+    protected TaskViewHolder onCreateChildViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View itemView = getLayoutInflater().inflate(R.layout.task_list_item,parent,false);
+        return new TaskViewHolder(this,itemView);
+
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        /*int viewType = getItemViewType(position);
-        if (TYPE_HEADER == viewType) {
-            int section = getSectionForPosition(position);
-            ((HeaderViewHolder) holder).bind(getSections().get(section));
-        }
-        else {
-            TaskModel model = getItem(position);
-            ((TaskViewHolder) holder).bind(model);
-        }*/
-        TaskModel model = getItem(position);
-        ((TaskViewHolder) holder).bind(model);
+    protected void onBindHeaderViewHolder(@NonNull HeaderViewHolder holder, int adapterPosition) {
+        Header data = (Header) getAdapterData(adapterPosition);
+        holder.bind(data);
     }
 
-    @Nullable
-    public TaskModel getItem(int position) {
-        return getCurrentList().get(position);
+    @Override
+    protected void onBindChildViewHolder(@NonNull TaskViewHolder holder, int adapterPosition) {
+        TaskModel model = (TaskModel) getAdapterData(adapterPosition);
+        holder.setOnClickItemOrChildClickListener(mCLickListener);
+        holder.setOnItemOrChildCheckChangeListener(mCheckListener);
+        holder.bind(model);
     }
 
-    /*@Override
-    public int getItemCount() {
-        return getCurrentList().size()+getSections().size();
-    }*/
+    @Override
+    protected void runInBackgroundBeforeBuildHeader(@NonNull List<TaskModel> items) {
+        sort(items);
+    }
 
-    /*@Override
-    public int getItemViewType(int position) {
-        if (getSectionPositions().contains(position)) {
-            return TYPE_HEADER;
+    @NonNull
+    @Override
+    protected Header onBuildSectionHeader(@NonNull TaskModel item) {
+        TaskState state = item.getState();
+        String displayText;
+        switch (state) {
+            case COMPLETE: displayText = getContext().getString(R.string.label_state_complete);
+            break;
+            case CANCEL: displayText = getContext().getString(R.string.label_state_cancel);
+            break;
+            default: displayText = getContext().getString(R.string.label_state_pending);
         }
-        return TYPE_TASK;
-    }*/
+        return new Header(displayText,state);
+    }
 
     private int getStateCode(@NonNull TaskState state) {
         switch (state) {
-            case START: return 0;
-            case PAUSE: return 1;
-            case COMPLETE: return 3;
-            case CANCEL: return 4;
-            default: return 2;
+            case COMPLETE: return 1;
+            case CANCEL: return 2;
+            default: return 0;
         }
     }
-
-    /*
-    protected void createSections(List<TaskModel> org) {
-        List<String> sections = new ArrayList<>();
-        List<Integer> positions = new ArrayList<>();
-        String last = null;
-        int position = 0;
-        for (TaskModel i : org) {
-            String section = onCreateSection(i);
-            if (!Objects.equals(last,section)) {
-                sections.add(section);
-                positions.add(position);
-                last = section;
-                position++;
-            }
-            position++;
-        }
-        setSections(sections);
-        setSectionPositions(positions);
-    }
-
-    protected String onCreateSection(@NonNull TaskModel task) {
-        return task.getState().name();
-    }
-
-    public List<String> getSections() {
-        return mSections;
-    }
-
-    public void setSections(List<String> sections) {
-        mSections = sections;
-    }
-
-    public List<Integer> getSectionPositions() {
-        return mSectionPositions;
-    }
-
-    public void setSectionPositions(List<Integer> positions) {
-        mSectionPositions = positions;
-    }
-
-    public int getSectionForPosition(int position) {
-        return getSectionPositions().indexOf(position);
-    }
-     */
-
 
     public static class TaskViewHolder extends ClickableViewHolder<TaskModel> {
 
         TextView mDescription;
-        TextView mDetails;
         CheckBox mCheckBox;
 
         CompoundButton.OnCheckedChangeListener mCBCheckChange = this::onCheckChanged;
@@ -205,7 +124,6 @@ public class TaskListAdapter extends ListAdapter<TaskModel, RecyclerView.ViewHol
         public TaskViewHolder(@NonNull RecyclerView.Adapter<?> adapter, @NonNull View itemView) {
             super(adapter,itemView);
             mDescription = itemView.findViewById(R.id.text1);
-            mDetails = itemView.findViewById(R.id.text2);
             mCheckBox = itemView.findViewById(R.id.checkbox);
             mCheckBox.setOnCheckedChangeListener(mCBCheckChange);
             itemView.setOnClickListener(this::onClick);
@@ -214,22 +132,33 @@ public class TaskListAdapter extends ListAdapter<TaskModel, RecyclerView.ViewHol
         @Override
         protected void bindNull() {
             mDescription.setText(null);
-            mDetails.setText(null);
             setCheckSilently(false);
         }
 
         @Override
         protected void bindNonNull(@NonNull TaskModel model) {
             TaskState state = model.getState();
-            if (state.equals(TaskState.COMPLETE)) {
-                mDescription.setText(TextUtil.strikeThrough(model.getDescription()));
+            if (TaskState.CANCEL == state) {
+                mDescription.setEnabled(false);
+                enableCheckBox(false);
+            }
+            else if (TaskState.COMPLETE == state) {
+                mDescription.setText(SpannableTextBuilder.text(model.getDescription()).strikeThrough().build());
+                mDescription.setEnabled(false);
                 setCheckSilently(true);
+                enableCheckBox(true);
             }
             else {
-                mDescription.setText(model.getDescription());
+                mDescription.setText(SpannableTextBuilder.text(model.getDescription()).bold().build());
+                mDescription.setEnabled(true);
                 setCheckSilently(false);
+                enableCheckBox(true);
             }
-            // TODO: add task details
+        }
+
+        void enableCheckBox(boolean enable) {
+            mCheckBox.setEnabled(enable);
+            mCheckBox.setClickable(enable);
         }
 
         void setCheckSilently(boolean checked) {
@@ -239,19 +168,61 @@ public class TaskListAdapter extends ListAdapter<TaskModel, RecyclerView.ViewHol
         }
     }
 
-    /**
-    public static class HeaderViewHolder extends RecyclerView.ViewHolder {
+    public static class Header {
+
+        private String displayText;
+        private TaskState taskState;
+
+        public Header(String displayText, TaskState taskState) {
+            this.displayText = displayText;
+            this.taskState = taskState;
+        }
+
+        public String getDisplayText() {
+            return displayText;
+        }
+
+        public TaskState getTaskState() {
+            return taskState;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Header)) return false;
+            Header header = (Header) o;
+            return taskState == header.taskState;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(taskState);
+        }
+    }
+
+    public static class HeaderViewHolder extends BaseViewHolder<Header> {
 
         TextView mHeader;
 
         public HeaderViewHolder(@NonNull View itemView) {
             super(itemView);
-            mHeader = itemView.findViewById(R.id.header_text);
+            mHeader = findViewById(R.id.header_text);
         }
 
-        public void bind(String value) {
-            mHeader.setText(value);
+        @Override
+        protected void bindNull() {
+            mHeader.setText(null);
+        }
+
+        @Override
+        protected void bindNonNull(@NonNull Header data) {
+            mHeader.setText(data.displayText);
+            if (data.getTaskState() == TaskState.PENDING) {
+                mHeader.setEnabled(true);
+            }
+            else {
+                mHeader.setEnabled(false);
+            }
         }
     }
-    */
 }

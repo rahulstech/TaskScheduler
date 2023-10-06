@@ -1,6 +1,9 @@
 package rahulstech.android.ui.helper;
 
 import android.app.TimePickerDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.text.SpannableStringBuilder;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -8,103 +11,107 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
 import rahulstech.android.database.datatype.DBDate;
+import rahulstech.android.database.datatype.DBDateTime;
 import rahulstech.android.database.datatype.DBTime;
-import rahulstech.android.database.datatype.DurationUnit;
 import rahulstech.android.database.datatype.TaskDataType;
+import rahulstech.android.database.datatype.TimeUnit;
 import rahulstech.android.database.entity.TaskData;
 import rahulstech.android.database.model.TaskModel;
 import rahulstech.android.ui.R;
+import rahulstech.android.ui.activity.CreateOrEditTaskActivity;
 import rahulstech.android.ui.dialog.DialogRemindBefore;
-import rahulstech.android.ui.util.TextUtil;
+import rahulstech.android.ui.dialog.DialogUtil;
 import rahulstech.android.ui.viewmodel.TaskDataViewModel;
 import rahulstech.android.util.concurrent.ListenableAsyncTask;
+import rahulstech.android.util.text.SpannableTextBuilder;
 import rahulstech.android.util.time.DateTime;
 
-public class TaskTimeDataOperation extends AbsTaskDataOperation {
+@SuppressWarnings({"unchecked"})
+public class TaskTimeDataOperation extends LifecycleAwareTaskDataOperation {
 
     private static final String TAG = "OpTimeData";
 
-    private static final int CODE_SAVE = 1;
-
-    private static final int CODE_REMOVE = 2;
-
     private TaskDataViewModel mViewModel;
 
-    public TaskTimeDataOperation(@NonNull AppCompatActivity activity) {
-        super(activity);
+    private ViewModelStoreOwner mVmStoreOwner;
+
+    public TaskTimeDataOperation(@NonNull Context context) {
+        super(context);
+    }
+
+    public void setViewModelStoreOwner(@NonNull ViewModelStoreOwner owner) {
+        this.mVmStoreOwner = owner;
+    }
+
+    @NonNull
+    public ViewModelStoreOwner getViewModelStoreOwner() {
+        return mVmStoreOwner;
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        if (null == mViewModel) {
-            mViewModel = new ViewModelProvider((ViewModelStoreOwner) getBaseContext(),
-                    (ViewModelProvider.Factory) new ViewModelProvider.AndroidViewModelFactory())
-                    .get(TaskDataViewModel.class);
-        }
-        addAsyncTaskSaveListener();
-        addAsyncTaskRemoveListener();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        removeAsyncTaskSaveListener();
-        removeAsyncTaskRemoveListener();
+    protected void onInit() {
+        mViewModel = new ViewModelProvider(getViewModelStoreOwner(),
+                (ViewModelProvider.Factory) new ViewModelProvider.AndroidViewModelFactory())
+                .get(TaskDataViewModel.class);
+        mViewModel.getAsyncTaskManager().getTaskUpdateLiveData().observe(getLifeCycleOwner(),mSaveListener);
+        mViewModel.getAsyncTaskManager().getTaskUpdateLiveData().observe(getLifeCycleOwner(),mRemoveListener);
     }
 
     @NonNull
     @Override
     public CharSequence getDisplayText(TaskData data, @NonNull String ifNull) {
-        String text;
+        DBTime time = getTask().getTimeStart();
+        if (null == time) return ifNull;
+        String taskTime = time.format("h : mm aa");
         if (null != data) {
-            DBTime time1 = data.getTime1();
             DBDate date2 = data.getDate2();
             DBTime time2 = data.getTime2();
-            DateTime time = DateTime.ofTime(time1.getHourOfDay(),time1.getMinute());
-            String taskTime = time.format("h : mm aa");
             if (null != date2 && null != time2) {
-                DateTime reminder = DateTime.ofDateTime(date2.getYear(), date2.getMonth(), date2.getDate(), time2.getHourOfDay(), time2.getMinute());
-                String plainText = taskTime+"\n(Remind at "+reminder.format("d MMM yy h:mm aa")+") ";
-                int start = taskTime.length()+1, end = plainText.length()-1;
-                return TextUtil.italic(TextUtil.relativeSize(plainText,.75f,start,end), start,end);
-            }
-            else {
-                return taskTime;
+                DBDateTime reminder = DBDateTime.from(date2,time2);
+                String reminderText = getString(R.string.label_next_reminder ,reminder.format("d-MMM-yy h:mm aa"));
+                return new SpannableStringBuilder(taskTime+"\n")
+                        .append(SpannableTextBuilder.text(reminderText).italic()
+                                .relativeSize(.75f).build());
             }
         }
-        return ifNull;
+        return taskTime;
     }
 
     @Override
-    public void addData(@NonNull TaskModel task) {
-        TaskData data = new TaskData();
-        data.setTaskId(task.getId());
-        data.setDate1(task.getDateStart());
-        onPickTime(data);
+    public void addData() {
+        TaskModel task = getTask();
+        //TaskData data = new TaskData();
+        //data.setTaskId(task.getId());
+        //data.setDate1(task.getDateStart());
+        //onPickTime(data);
+
+        if (null == task.getTimeStart()) {
+            Intent intent = new Intent(this, CreateOrEditTaskActivity.class);
+            intent.setAction(CreateOrEditTaskActivity.ACTION_EDIT_TASK);
+            intent.putExtra(CreateOrEditTaskActivity.EXTRA_TASK_ID,task.getId());
+            startActivity(intent);
+        }
     }
 
     @Override
     public void setData(@NonNull TaskData oldData) {
-        new AlertDialog.Builder(this)
-                .setSingleChoiceItems(R.array.change_task_time_options,0,(di, which)->{
-                    di.dismiss();
-                    if (0 == which) {
-                        onPickTime(oldData);
-                    }
-                    else if (1 == which) {
-                        onRemoveReminder(oldData);
-                    }
-                    else {
-                        onRemoveTime(oldData);
-                    }
-                })
-                .show();
+        DialogUtil.showSingleChoiceDialog(this,null,
+                getResources().getTextArray(R.array.change_task_time_options),
+                (di,which)->{
+            di.dismiss();
+            if (0 == which) {
+                onPickTime(oldData);
+            }
+            else if (1 == which) {
+                onRemoveReminder(oldData);
+            }
+            else {
+                onRemoveTime(oldData);
+            }
+        }).show();
     }
 
     private void onPickTime(@NonNull TaskData data) {
@@ -152,7 +159,7 @@ public class TaskTimeDataOperation extends AbsTaskDataOperation {
             String text5 = data.getText5();
             if (null != long2 && long2 > 0) {
                 dialog.setIsRemindBefore(true);
-                dialog.setRemindBefore(long2.intValue(), DurationUnit.valueOf(text5));
+                dialog.setRemindBefore(long2.intValue(), TimeUnit.valueOf(text5));
             }
             else {
                 dialog.setIsRemindBefore(false);
@@ -173,7 +180,7 @@ public class TaskTimeDataOperation extends AbsTaskDataOperation {
         onRemoveSingleDate(data);
     }
 
-    private DateTime calculateReminderDateTime(@NonNull DBDate date, @NonNull DBTime time, int before, @NonNull DurationUnit unit) {
+    private DateTime calculateReminderDateTime(@NonNull DBDate date, @NonNull DBTime time, int before, @NonNull TimeUnit unit) {
         DateTime dateTime = DateTime.ofDateTime(date.getYear(),date.getMonth(),date.getDate(),time.getHourOfDay(),time.getMinute());
         switch (unit) {
             case MINUTE: {
@@ -202,23 +209,17 @@ public class TaskTimeDataOperation extends AbsTaskDataOperation {
 
     @Override
     protected void onAddMultipleData(@NonNull List<TaskData> data) {
-        ListenableAsyncTask<Void,Void,List<TaskData>> asyncTask = mViewModel.addTaskData(data);
-        asyncTask.setAsyncTaskLister(mSaveListener);
-        asyncTask.start(CODE_SAVE);
+        mViewModel.addTaskData(data);
     }
 
     @Override
     protected void onSetMultipleData(@NonNull List<TaskData> data) {
-        ListenableAsyncTask<Void,Void,List<TaskData>> asyncTask = mViewModel.setTaskData(data);
-        asyncTask.setAsyncTaskLister(mSaveListener);
-        asyncTask.start(CODE_SAVE);
+        mViewModel.setTaskData(data);
     }
 
     @Override
     protected void onRemoveMultipleData(@NonNull List<TaskData> data) {
-        ListenableAsyncTask<Void,Void,List<TaskData>> asyncTask = mViewModel.removeTaskData(data);
-        asyncTask.setAsyncTaskLister(mRemoveListener);
-        asyncTask.start(CODE_REMOVE);
+        mViewModel.removeTaskData(data);
     }
 
     @Override
@@ -245,60 +246,30 @@ public class TaskTimeDataOperation extends AbsTaskDataOperation {
         Toast.makeText(this, R.string.message_changes_not_saved, Toast.LENGTH_SHORT).show();
     }
 
-    private void addAsyncTaskSaveListener() {
-        ListenableAsyncTask asyncTask = mViewModel.getAsyncTaskManaget().getTask(CODE_SAVE);
-        if (null != asyncTask) {
-            asyncTask.setAsyncTaskLister(mSaveListener);
-        }
-    }
-
-    private void removeAsyncTaskSaveListener() {
-        ListenableAsyncTask asyncTask = mViewModel.getAsyncTaskManaget().getTask(CODE_SAVE);
-        if (null != asyncTask) {
-            asyncTask.setAsyncTaskLister(null);
-        }
-    }
-
-    private void addAsyncTaskRemoveListener() {
-        ListenableAsyncTask asyncTask = mViewModel.getAsyncTaskManaget().getTask(CODE_REMOVE);
-        if (null != asyncTask) {
-            asyncTask.setAsyncTaskLister(mRemoveListener);
-        }
-    }
-
-    private void removeAsyncTaskRemoveListener() {
-        ListenableAsyncTask asyncTask = mViewModel.getAsyncTaskManaget().getTask(CODE_REMOVE);
-        if (null != asyncTask) {
-            asyncTask.setAsyncTaskLister(null);
-        }
-    }
-
     private final ListenableAsyncTask.AsyncTaskListener<Void,Void,List<TaskData>> mSaveListener =
-            new ListenableAsyncTask.SimpleAsyncTaskListener<Void,Void,List<TaskData>>(){
-        @Override
-        public void onResult(List<TaskData> data) {
-            mViewModel.getAsyncTaskManaget().removeTask(CODE_SAVE);
-            onMultipleSaveSuccessful(data);
-        }
+            new ListenableAsyncTask.AsyncTaskListener<Void,Void,List<TaskData>>(){
 
-        @Override
-        public void onError(@NonNull Exception error) {
-            mViewModel.getAsyncTaskManaget().removeTask(CODE_SAVE);
-            onSaveError(error);
-        }
+                @Override
+                public void onError(@NonNull ListenableAsyncTask<?, ?, ?> asyncTask, @NonNull Exception error) {
+                    onSaveError(error);
+                }
+
+                @Override
+                public void onResult(@NonNull ListenableAsyncTask<?, ?, ?> asyncTask, @Nullable List<TaskData> data) {
+                    onMultipleSaveSuccessful(data);
+                }
     };
 
-    private final ListenableAsyncTask.AsyncTaskListener<Void,Void,List<TaskData>> mRemoveListener =
-            new ListenableAsyncTask.SimpleAsyncTaskListener<Void,Void,List<TaskData>>(){
+    private final ListenableAsyncTask.AsyncTaskListener<Void,Void,List<TaskData>> mRemoveListener
+            = new ListenableAsyncTask.AsyncTaskListener<Void,Void,List<TaskData>>(){
+
         @Override
-        public void onResult(List<TaskData> data) {
-            mViewModel.getAsyncTaskManaget().removeTask(CODE_REMOVE);
+        public void onResult(@NonNull ListenableAsyncTask<?, ?, ?> asyncTask, @Nullable List<TaskData> data) {
             onMultipleRemoveSuccessful(data);
         }
 
         @Override
-        public void onError(@NonNull Exception error) {
-            mViewModel.getAsyncTaskManaget().removeTask(CODE_REMOVE);
+        public void onError(@NonNull ListenableAsyncTask<?, ?, ?> asyncTask, @NonNull Exception error) {
             onRemoveError(error);
         }
     };

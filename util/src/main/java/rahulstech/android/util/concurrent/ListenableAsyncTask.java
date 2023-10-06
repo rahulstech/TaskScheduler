@@ -3,11 +3,14 @@ package rahulstech.android.util.concurrent;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
+import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
-
-import static rahulstech.android.util.concurrent.AppExecutors.getBackgroundExecutor;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 
 @SuppressWarnings("unused")
 public abstract class ListenableAsyncTask<Param,Progress,Result> extends AsyncTask<Param,Progress, ListenableAsyncTask.TaskResult> {
@@ -15,40 +18,27 @@ public abstract class ListenableAsyncTask<Param,Progress,Result> extends AsyncTa
     private static final String TAG = "ListenableAsyncTask";
 
     private final AsyncTasksManager mManager;
-    private final AsyncTaskListenerWrapper<Param,Progress,Result> mListener = new AsyncTaskListenerWrapper<>();
+    private final String mTag;
 
-    public ListenableAsyncTask(@NonNull AsyncTasksManager manager) {
-        mManager = manager;
+    private int mVersion = 0;
+    private Progress[] mProgress = null;
+
+    public ListenableAsyncTask(AsyncTasksManager manager, String tag) {
+        Objects.requireNonNull(manager,"null == AsyncTaskManager");
+        Objects.requireNonNull(tag,"null == tag");
+        this.mManager = manager;
+        this.mTag = tag;
     }
 
-    public void setAsyncTaskLister(AsyncTaskListener<Param,Progress,Result> listener) {
-        mListener.wrap(listener);
-        notifyNowIfNeeded();
+    @NonNull
+    public final String getTag(){
+        return mTag;
     }
 
-    private void notifyNowIfNeeded() {
-        Status s = getStatus();
-        if (Status.FINISHED == s) {
-            if (isCancelled()) {
-                mListener.onCanceled();
-            }
-            else {
-                try {
-                    TaskResult result = get();
-                    if (null != result.error) {
-                        mListener.onError(getError());
-                    } else {
-                        mListener.onResult(getResult());
-                    }
-                } catch (InterruptedException | ExecutionException ignore) {
-                }
-            }
-        }
-    }
-
-    public void start(int id, Param... params) {
-        mManager.addAsyncTask(id,this);
-        executeOnExecutor(getBackgroundExecutor(),params);
+    @SafeVarargs
+    public final void start(Param... params) {
+        mManager.addTask(mTag,this);
+        execute(params);
     }
 
     @SafeVarargs
@@ -57,16 +47,23 @@ public abstract class ListenableAsyncTask<Param,Progress,Result> extends AsyncTa
         TaskResult result = new TaskResult();
         try {
             result.output = onExecuteInBackground(params);
+            result.successful = true;
         }
         catch (Exception ex) {
             result.error = ex;
+            result.successful = false;
+        }
+        if (isCancelled()) {
+            result.successful = false;
+            result.error = null;
+            result.output = null;
         }
         return result;
     }
 
     protected abstract Result onExecuteInBackground(Param... params) throws Exception;
 
-
+    @NonNull
     public Exception getError() throws ExecutionException, InterruptedException {
         TaskResult result = get();
         return result.error;
@@ -79,97 +76,74 @@ public abstract class ListenableAsyncTask<Param,Progress,Result> extends AsyncTa
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    protected void onPostExecute(TaskResult result) {
-        if (null == result.error) {
-            mListener.onResult((Result) result.output);
-        }
-        else {
-            mListener.onError(result.error);
-        }
+    protected void onPostExecute(@NonNull TaskResult result) {
+        this.mProgress = null;
+        update();
     }
+
+    @SafeVarargs
+    @Override
+    protected final void onProgressUpdate(Progress... values) {
+        this.mProgress = values;
+        update();
+    }
+
+    @Nullable
+    public Progress[] getProgress() {return mProgress;}
 
     @Override
-    protected void onProgressUpdate(Progress... values) {
-        mListener.onProgressUpdate(values);
+    protected void onCancelled() {update();}
+
+    @MainThread
+    private void update() {
+        mVersion++;
+        MutableLiveData<ListenableAsyncTask<?,?,?>> liveData
+                = (MutableLiveData<ListenableAsyncTask<?,?,?>>) mManager.getTaskUpdateLiveData();
+        liveData.postValue(this);
     }
 
-    @Override
-    protected void onCancelled() {
-        mListener.onCanceled();
-    }
-
-    public static class TaskResult {
+    static class TaskResult {
         Object output = null;
+        boolean successful = false;
         Exception error = null;
     }
 
-    public interface AsyncTaskListener<Param,Progress,Result> {
+    public static class AsyncTaskListener<Param,Progress,Result> implements Observer<ListenableAsyncTask<?,?,?>>  {
 
-        void onProgressUpdate(Progress... progress);
-
-        void onCanceled();
-
-        void onResult(Result result);
-
-        void onError(@NonNull Exception error);
-    }
-
-    public static class SimpleAsyncTaskListener<Param,Progress,Result> implements AsyncTaskListener<Param,Progress,Result> {
+        private int mVersion = 0;
 
         @Override
-        public void onProgressUpdate(Progress... progress) {}
-
-        @Override
-        public void onCanceled() {}
-
-        @Override
-        public void onResult(Result result) {}
-
-        @Override
-        public void onError(@NonNull Exception error) {}
-    }
-
-    private static class AsyncTaskListenerWrapper<Param,Progress,Result> implements AsyncTaskListener<Param,Progress,Result> {
-
-        private AsyncTaskListener<Param,Progress,Result> mWrapped = null;
-
-
-        public boolean hasListener() {
-            return null != mWrapped;
-        }
-
-        public void wrap(AsyncTaskListener<Param,Progress,Result> listener) {
-            mWrapped = listener;
-        }
-
-        @Override
-        public void onProgressUpdate(Progress... progress) {
-            if (hasListener()) {
-                mWrapped.onProgressUpdate(progress);
+        @SuppressWarnings("unchecked")
+        public final void onChanged(ListenableAsyncTask<?, ?, ?> asyncTask) {
+            Log.d(TAG,"onChange(): mVersion="+mVersion+" asyncTask.mVersion="+asyncTask.mVersion+" mTag="+ asyncTask.mTag);
+            if (mVersion < asyncTask.mVersion) {
+                mVersion = asyncTask.mVersion;
+                AsyncTask.Status status = asyncTask.getStatus();
+                if (Status.RUNNING == status) {
+                    onProgressUpdate(asyncTask, (Progress[]) asyncTask.getProgress());
+                } else if (Status.FINISHED == status) {
+                    if (asyncTask.isCancelled()) {
+                        onCanceled(asyncTask);
+                    } else {
+                        try {
+                            TaskResult result = asyncTask.get();
+                            if (result.successful) {
+                                onResult(asyncTask, (Result) result.output);
+                            } else {
+                                onError(asyncTask, result.error);
+                            }
+                        } catch (ExecutionException | InterruptedException ignore) {}
+                    }
+                }
             }
         }
 
-        @Override
-        public void onCanceled() {
-            if (hasListener()) {
-                mWrapped.onCanceled();
-            }
-        }
+        public void onProgressUpdate(@NonNull ListenableAsyncTask<?,?,?> asyncTask, @Nullable Progress[] progress) {}
 
-        @Override
-        public void onResult(Result result) {
-            Log.d(TAG,"hasListener="+hasListener()+" result="+result);
-            if (hasListener()) {
-                mWrapped.onResult(result);
-            }
-        }
+        public void onCanceled(@NonNull ListenableAsyncTask<?,?,?> asyncTask) {}
 
-        @Override
-        public void onError(@NonNull Exception error) {
-            if (hasListener()) {
-                mWrapped.onError(error);
-            }
-        }
+        public void onResult(@NonNull ListenableAsyncTask<?,?,?> asyncTask, @Nullable Result result) {}
+
+        public void onError(@NonNull ListenableAsyncTask<?,?,?> asyncTask, @NonNull Exception error) {}
     }
 }

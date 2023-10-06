@@ -1,6 +1,6 @@
 package rahulstech.android.database.datatype;
 
-public enum DurationUnit {
+public enum TimeUnit {
     MINUTE,
     HOUR,
     DAY

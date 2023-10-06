@@ -2,8 +2,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/delete_task"
-        android:title="@string/label_delete_task"
+    <item android:id="@+id/history"
+        android:title="@string/label_history"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_baseline_history_48"
+        app:iconTint="@color/white"/>
+
+    <item android:id="@+id/copy_task"
+        android:title="@string/label_copy_task"
         app:showAsAction="never"/>
 
+    <item android:id="@+id/delete_task"
+        android:title="@string/label_delete"
+        app:showAsAction="never"/>
 </menu>

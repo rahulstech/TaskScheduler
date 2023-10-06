@@ -8,6 +8,7 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 import rahulstech.android.database.datatype.DBDate;
+import rahulstech.android.database.datatype.DBTime;
 import rahulstech.android.database.datatype.DatatypeConverters;
 import rahulstech.android.database.datatype.TaskState;
 
@@ -24,15 +25,18 @@ public class Task {
     private DBDate dateStart;
 
     @NonNull
-    @ColumnInfo(typeAffinity = ColumnInfo.TEXT)
     private TaskState state;
 
     @NonNull
     private String description;
 
+    @ColumnInfo(typeAffinity = ColumnInfo.TEXT)
+    @TypeConverters(DatatypeConverters.class)
+    private DBTime timeStart;
+
     public Task() {
         this.dateStart = DBDate.today();
-        this.state = TaskState.CREATE;
+        this.state = TaskState.PENDING;
         this.description = "No Description";
     }
 
@@ -71,6 +75,14 @@ public class Task {
         this.description = description;
     }
 
+    public DBTime getTimeStart() {
+        return timeStart;
+    }
+
+    public void setTimeStart(DBTime timeStart) {
+        this.timeStart = timeStart;
+    }
+
     @NonNull
     @Override
     public String toString() {
@@ -79,6 +91,7 @@ public class Task {
                 ", dateStart=" + dateStart +
                 ", state=" + state +
                 ", description='" + description + '\'' +
+                ", timeStart=" + timeStart +
                 '}';
     }
 
@@ -87,12 +100,12 @@ public class Task {
         if (this == o) return true;
         if (!(o instanceof Task)) return false;
         Task task = (Task) o;
-        return id == task.id && dateStart.equals(task.dateStart) && state == task.state && description.equals(task.description);
+        return id == task.id && dateStart.equals(task.dateStart) && state == task.state && description.equals(task.description) && Objects.equals(timeStart, task.timeStart);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, dateStart, state, description);
+        return Objects.hash(id, dateStart, state, description, timeStart);
     }
 
     @NonNull
@@ -102,6 +115,7 @@ public class Task {
         copy.dateStart = this.dateStart;
         copy.state = this.state;
         copy.description = this.description;
+        copy.timeStart = this.timeStart;
         return copy;
     }
 }

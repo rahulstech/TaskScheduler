@@ -15,7 +15,6 @@ public class BaseViewModel extends AndroidViewModel {
         super(application);
     }
 
-
     @NonNull
     public AsyncTasksManager getAsyncTaskManager() {
         return mTaskManager;

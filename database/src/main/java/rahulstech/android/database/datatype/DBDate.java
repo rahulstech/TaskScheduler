@@ -5,8 +5,8 @@ import java.util.Date;
 import java.util.Locale;
 
 import androidx.annotation.NonNull;
+import rahulstech.android.database.util.DBDateTimeUtil;
 
-import static rahulstech.android.database.util.DBDateTimeUtil.format;
 import static rahulstech.android.database.util.DBDateTimeUtil.parse;
 
 @SuppressWarnings(value = {"unused"})
@@ -16,10 +16,10 @@ public class DBDate {
 
     private static final String DATE_PATTERN = "yyyy-MM-dd";
 
-    final Calendar mCalender;
+    final Calendar mCalendar;
 
     DBDate(@NonNull Calendar c) {
-        mCalender = c;
+        mCalendar = c;
         // set the time at start of day
         c.set(Calendar.HOUR_OF_DAY,0);
         c.set(Calendar.MINUTE,0);
@@ -28,15 +28,15 @@ public class DBDate {
     }
 
     public int getYear() {
-        return mCalender.get(Calendar.YEAR);
+        return mCalendar.get(Calendar.YEAR);
     }
 
     public int getMonth() {
-        return mCalender.get(Calendar.MONTH);
+        return mCalendar.get(Calendar.MONTH);
     }
 
     public int getDate() {
-        return mCalender.get(Calendar.DAY_OF_MONTH);
+        return mCalendar.get(Calendar.DAY_OF_MONTH);
     }
 
     @NonNull
@@ -59,10 +59,14 @@ public class DBDate {
         return new DBDate(c);
     }
 
+    public String format(@NonNull String pattern) {
+        return DBDateTimeUtil.format(mCalendar.getTime(),pattern);
+    }
+
     @NonNull
     @Override
     public String toString() {
-        return format(mCalender.getTime(),DATE_PATTERN);
+        return format(DATE_PATTERN);
     }
 
     @Override

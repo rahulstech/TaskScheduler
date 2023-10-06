@@ -53,15 +53,15 @@ public class TaskDaoTest {
         Task task = new Task();
         task.setDescription("This is new task");
         task.setDateStart(DBDate.of(2023,5,6));
-        task.setState(TaskState.COMPLETE);
+        task.setState(TaskState.PENDING);
         long id = dao.addTask(task);
         assertTrue(id > 0);
     }
 
     @Test
     public void setTask() {
-        // db.execSQL("INSERT INTO `tasks` (`id`,`description`,`dateStart`,`scheduleTimeStart`,`taskTimeStart`,`taskTimeEnd`,`durationMinute`,`breakMinute`,`state`) " +
-        //                "VALUES (3,\"Task 3\",\"2023-04-08\",\"09:00:00\",\"10:00:00\",NULL,60,5,\"PAUSE\");");
+        // db.execSQL("INSERT INTO `tasks` (`id`,`description`,`dateStart`,`state`) " +
+        //                "VALUES (3,\"Task 3\",\"2023-04-08\",\"PAUSE\");");
         Task task = new Task();
         task.setId(3);
         task.setDescription("Task 3");
@@ -74,11 +74,8 @@ public class TaskDaoTest {
 
     @Test
     public void removeTask() {
-        Task task = new Task();
-        task.setId(1);
-
-        int actual = dao.removeTask(task);
-        assertEquals(1,actual);
+        int actual = dao.removeTask(new long[]{1,2});
+        assertEquals(2,actual);
     }
 
     @Test
@@ -86,20 +83,20 @@ public class TaskDaoTest {
         LiveData<List<TaskModel>> tasksLiveData = dao.findTaskForDate(DBDate.of(2023,3,8));
         testLiveData(tasksLiveData,actual -> {
             /**
-             * db.execSQL("INSERT INTO `tasks` (`id`,`description`,`dateStart`,`scheduleTimeStart`,`taskTimeStart`,`taskTimeEnd`,`durationMinute`,`breakMinute`,`durationComplete`,`state`) " +
-             *                 "VALUES (3,\"Task 3\",\"2023-04-08\",\"09:00:00\",\"10:00:00\",NULL,60,5,30,\"PAUSE\");");
+             * db.execSQL("INSERT INTO `tasks` (`id`,`description`,`dateStart`,`state`) " +
+             *                 "VALUES (3,\"Task 3\",\"2023-04-08\",\"PAUSE\");");
              *
-             * db.execSQL("INSERT INTO `tasks` (`id`,`description`,`dateStart`,`scheduleTimeStart`,`taskTimeStart`,`taskTimeEnd`,`durationMinute`,`breakMinute`,`durationComplete`,`state`) " +
-             *                 "VALUES (5,\"Task 5\",\"2023-04-08\",\"14:00:00\",\"15:30:00\",NULL,60,0,10,\"START\");");
+             *  db.execSQL("INSERT INTO `tasks` (`id`,`description`,`dateStart`,`state`) " +
+             *                 "VALUES (5,\"Task 5\",\"2023-04-08\",\"START\");");
              */
             TaskModel task3 = new TaskModel();
-            task3.setId(3);
+            task3.setId(3L);
             task3.setDescription("Task 3");
             task3.setDateStart(DBDate.of(2023,3,8));
             task3.setState(TaskState.PAUSE);
 
             TaskModel task5 = new TaskModel();
-            task5.setId(5);
+            task5.setId(5L);
             task5.setDescription("Task 5");
             task5.setDateStart(DBDate.of(2023,3,8));
             task5.setState(TaskState.START);
@@ -113,11 +110,11 @@ public class TaskDaoTest {
 
     @Test
     public void findTaskById() throws Exception {
-        LiveData<TaskModel> liveData = dao.findTaskById(3);
+        LiveData<Task> liveData = dao.findTaskById(3);
         testLiveData(liveData, actual -> {
-            // db.execSQL("INSERT INTO `tasks` (`id`,`description`,`dateStart`,`scheduleTimeStart`,`taskTimeStart`,`taskTimeEnd`,`durationMinute`,`breakMinute`,`state`) " +
-            //                "VALUES (3,\"Task 3\",\"2023-04-08\",\"09:00:00\",\"10:00:00\",NULL,60,5,\"PAUSE\");");
-            TaskModel expected = new TaskModel();
+            // db.execSQL("INSERT INTO `tasks` (`id`,`description`,`dateStart`,`state`) " +
+            //                "VALUES (3,\"Task 3\",\"2023-04-08\",\"PAUSE\");");
+            Task expected = new Task();
             expected.setId(3);
             expected.setDescription("Task 3");
             expected.setDateStart(DBDate.of(2023,3,8));

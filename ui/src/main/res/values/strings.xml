@@ -1,16 +1,18 @@
 <resources>
 
+    <string name="label_add_task">Add Task</string>
+    <string name="label_edit_task">Edit Task</string>
+    <string name="label_view_task">View Task</string>
+    <string name="label_copy_task">Copy Task</string>
+
     <string name="label_task_description">Description</string>
     <string name="label_task_duration">Duration</string>
-    <string name="label_task_start_date">Date Start</string>
-    <string name="label_task_schedule_time_start">Time Start</string>
+    <string name="label_task_start_date">Task Date</string>
+    <string name="label_task_time_start">Task Time</string>
     <string name="label_save">Save</string>
     <string name="label_clear">Clear</string>
     <string name="label_no_task">No Task</string>
-    <string name="label_add_task">Add Task</string>
-    <string name="label_edit_task">Edit Task</string>
-    <string name="label_delete_task">Delete Task</string>
-    <string name="label_view_task">View Task</string>
+    <string name="label_delete">Delete</string>
     <string name="label_cancel">Cancel</string>
     <string name="label_today">Today</string>
     <string name="label_yesterday">Yesterday</string>
@@ -18,34 +20,27 @@
     <string name="label_task_time">Time</string>
     <string name="label_add_reminder">Add Reminder</string>
     <string name="label_reminder_on_time">Remind On Time</string>
-    <string name="label_reminder_before">Remin Before</string>
+    <string name="label_reminder_before">Remind Before</string>
     <string name="label_remind_before">Remind Before</string>
     <string name="label_save_without_reminder">Save, No Reminder</string>
-    <string name="label_task_time_and_reminder">%1$s (Remind before %2$d %3$s)</string>
+    <string name="label_next_reminder">(Next Reminder %1$s)</string>
+    <string name="label_history">History</string>
+    <string name="label_state_complete">Finished</string>
+    <string name="label_state_cancel">Cancel</string>
+    <string name="label_state_pending">Upcoming</string>
 
     <string name="message_error_no_task_description">add some task description</string>
     <string name="message_error_task_description_overflown">give a shorter description</string>
-    <string name="message_has_error">inputs contain one or more error</string>
+    <string name="message_error_input">one or more inputs have errors</string>
     <string name="message_error_task_not_found">task not found</string>
     <string name="message_error_task_not_saved">task not saved</string>
     <string name="message_task_saved">task saved</string>
     <string name="message_task_removed">task deleted successfully</string>
     <string name="message_error_task_not_removed">task not deleted</string>
-    <string name="message_warning_delete_task">You are about to permanently delete the task \"%1$s\". Do you want to proceed?"</string>
+    <string name="message_warning_delete_task">You are about to permanently delete the task %1$s. Do you want to proceed?"</string>
     <string name="message_task_time_not_set">Time Not Set</string>
     <string name="message_error_remind_before_invalid">invalid remind before</string>
     <string name="message_changes_saved">changes saved</string>
     <string name="message_changes_not_saved">changes not saved</string>
-
-    <string-array name="duration_units">
-        <item>Minute</item>
-        <item>Hour</item>
-        <item>Day</item>
-    </string-array>
-
-    <string-array name="change_task_time_options">
-        <item>Change Time and Reminder</item>
-        <item>Remove Reminder</item>
-        <item>Remove Time</item>
-    </string-array>
+    <string name="message_task_not_fetched">still loading task</string>
 </resources>
