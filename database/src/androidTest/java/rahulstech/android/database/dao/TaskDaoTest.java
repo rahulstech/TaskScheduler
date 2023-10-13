@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
@@ -80,7 +81,7 @@ public class TaskDaoTest {
 
     @Test
     public void findAllForDate() throws Exception {
-        LiveData<List<TaskModel>> tasksLiveData = dao.findTaskForDate(DBDate.of(2023,3,8));
+        LiveData<List<TaskModel>> tasksLiveData = dao.findTasksForDate(LocalDate.of(2023,3,8));
         testLiveData(tasksLiveData,actual -> {
             /**
              * db.execSQL("INSERT INTO `tasks` (`id`,`description`,`dateStart`,`state`) " +
@@ -92,13 +93,13 @@ public class TaskDaoTest {
             TaskModel task3 = new TaskModel();
             task3.setId(3L);
             task3.setDescription("Task 3");
-            task3.setDateStart(DBDate.of(2023,3,8));
+            task3.setDate(LocalDate.of(2023,3,8));
             task3.setState(TaskState.PAUSE);
 
             TaskModel task5 = new TaskModel();
             task5.setId(5L);
             task5.setDescription("Task 5");
-            task5.setDateStart(DBDate.of(2023,3,8));
+            task5.setDate(LocalDate.of(2023,3,8));
             task5.setState(TaskState.START);
 
             List<TaskModel> expected = Arrays.asList(task3,task5);

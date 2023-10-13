@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "rahulstech.android.taskschedulder"
-        minSdk 21
+        minSdk 26
         //noinspection OldTargetApi
         targetSdk 32
         versionCode 1
@@ -31,10 +31,13 @@ android {
 
 dependencies {
 
-    api project(path: ':ui')
+    api project(path: ':database')
     implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation project(path: ':background')
+    implementation project(path: ':util')
+    implementation 'androidx.navigation:navigation-fragment:2.5.3'
+    implementation 'androidx.navigation:navigation-ui:2.5.3'
+    implementation 'androidx.gridlayout:gridlayout:1.0.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'

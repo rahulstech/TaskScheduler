@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/view_task_navigation"
+    app:startDestination="@id/viewTaskFragment">
+
+    <fragment
+        android:id="@+id/viewTaskFragment"
+        android:name="rahulstech.android.taskschedulder.fragment.ViewTaskFragment"
+        android:label="ViewTaskFragment"
+        tools:layout="@layout/fragment_view_task">
+
+        <action
+            android:id="@+id/action_viewTaskFragment_to_copyTaskFragment"
+            app:destination="@id/copyTaskFragment" />
+        <action
+            android:id="@+id/action_viewTaskFragment_to_taskReminderFragment"
+            app:destination="@id/taskReminderFragment" />
+        <action android:id="@+id/action_viewTaskFragment_to_taskNoteFragment"
+            app:destination="@id/taskNoteFragment"/>
+    </fragment>
+    <fragment
+        android:id="@+id/copyTaskFragment"
+        android:name="rahulstech.android.taskschedulder.fragment.CopyTaskFragment"
+        android:label="@string/label_copy_task"
+        tools:layout="@layout/fragment_copy_task">
+
+    </fragment>
+
+    <fragment android:id="@+id/taskReminderFragment"
+        android:name="rahulstech.android.taskschedulder.fragment.TaskReminderFragment"
+        android:label="@string/label_task_reminder"
+        tools:layout="@layout/fragment_task_reminder">
+
+    </fragment>
+    <fragment
+        android:id="@+id/taskNoteFragment"
+        android:name="rahulstech.android.taskschedulder.fragment.TaskNoteFragment"
+        android:label="fragment_task_note"
+        tools:layout="@layout/fragment_task_note" />
+
+</navigation>

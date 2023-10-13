@@ -11,7 +11,8 @@ import java.util.Locale;
 
 import androidx.annotation.NonNull;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused","deprecation"})
+@Deprecated
 public class DateTime implements Serializable {
 
     final Calendar mCalendar;

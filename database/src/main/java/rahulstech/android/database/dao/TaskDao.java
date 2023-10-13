@@ -1,5 +1,7 @@
 package rahulstech.android.database.dao;
 
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -10,9 +12,6 @@ import androidx.room.Query;
 import androidx.room.Transaction;
 import androidx.room.Update;
 import rahulstech.android.database.datatype.DBDate;
-import rahulstech.android.database.datatype.DBTime;
-import rahulstech.android.database.datatype.TaskDataType;
-import rahulstech.android.database.datatype.TaskState;
 import rahulstech.android.database.entity.Task;
 import rahulstech.android.database.entity.TaskData;
 import rahulstech.android.database.model.TaskModel;
@@ -22,49 +21,17 @@ import rahulstech.android.database.model.TaskModel;
 public abstract class TaskDao {
 
     @Transaction
-    public long addTask(@NonNull Task newTask) {
-        long id = insert_task(newTask);
-        if (id > 0) {
-            TaskData data = new TaskData();
-            data.setTaskId(id);
-            data.setType(TaskDataType.TYPE_TASK_STATE);
-            data.setDate1(DBDate.today());
-            data.setTime1(DBTime.now());
-            data.setText5(newTask.getState().name());
-            if (insert_task_data(data) > 0){
-                return id;
-            }
-        }
-        return 0;
-    }
+    @Insert
+    public abstract long[] addAllTasks(@NonNull List<Task> tasks);
 
     @Insert
-    protected abstract long insert_task(Task newTask);
-
-    @Transaction
-    public int setTask(Task task) {
-        Task oldTask = getTaskById(task.getId());
-        if (1 == update_task(task)) {
-            TaskState oldState = oldTask.getState();
-            TaskState newState = task.getState();
-            if (!oldState.equals(newState)) {
-                TaskData data = new TaskData();
-                data.setTaskId(task.getId());
-                data.setType(TaskDataType.TYPE_TASK_STATE);
-                data.setText5(newState.name());
-                data.setDate1(DBDate.today());
-                data.setTime1(DBTime.now());
-                if (insert_task_data(data)>0) {
-                    return 1;
-                }
-            }
-            return 1;
-        }
-        return 0;
-    }
+    public abstract long addTask(@NonNull Task newTask);
 
     @Update
-    protected abstract int update_task(Task task);
+    public abstract int setTask(@NonNull Task task);
+
+    @Update
+    public abstract int setAllTasks(@NonNull List<Task> tasks);
 
     @Query("SELECT * FROM `tasks` WHERE `id` = :id")
     public abstract Task getTaskById(long id);
@@ -73,12 +40,21 @@ public abstract class TaskDao {
     protected abstract long insert_task_data(TaskData data);
 
     @Query("DELETE FROM `tasks` WHERE `id` IN(:ids)")
+    @Deprecated
     public abstract int removeTask(long[] ids);
 
-    @Query("SELECT * FROM `tasks` WHERE `dateStart` = :dateStart")
-    public abstract LiveData<List<TaskModel>> findTaskForDate(DBDate dateStart);
+    @Query("DELETE FROM `tasks` WHERE `id` IN(:ids)")
+    public abstract int removeTasks(@NonNull List<Long> ids);
 
-    // TODO: change return type of this method
+    @Query("SELECT `id`,`description`,`state`,`date`,`time` FROM `tasks` WHERE `date` = :date")
+    public abstract LiveData<List<TaskModel>> findTasksForDate(@NonNull LocalDate date);
+
+    @Query("SELECT * FROM `tasks` WHERE `id` = :origin OR `origin` = :origin")
+    public abstract List<Task> findConnectedTasks(long origin);
+
     @Query("SELECT * FROM `tasks` WHERE `id` = :id")
     public abstract LiveData<Task> findTaskById(long id);
+
+    @Query("SELECT * FROM `tasks_brief` WHERE `id` = :id")
+    public abstract LiveData<TaskModel> findTaskBriefById(long id);
 }

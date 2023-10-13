@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import rahulstech.android.database.util.DBDateTimeUtil;
 
 @SuppressWarnings("unused")
+@Deprecated
 public class DBDateTime {
 
     private static final String TAG = "DBDate";

@@ -10,6 +10,7 @@ import rahulstech.android.database.util.DBDateTimeUtil;
 import static rahulstech.android.database.util.DBDateTimeUtil.parse;
 
 @SuppressWarnings(value = {"unused"})
+@Deprecated
 public class DBDate {
 
     private static final String TAG = "DBDate";

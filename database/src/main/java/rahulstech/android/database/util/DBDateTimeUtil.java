@@ -7,6 +7,7 @@ import java.util.Date;
 import androidx.annotation.NonNull;
 
 @SuppressWarnings(value = {"unused","SimpleDateFormat"})
+@Deprecated
 public class DBDateTimeUtil {
 
     public static Date parse(@NonNull String value, @NonNull String pattern) {

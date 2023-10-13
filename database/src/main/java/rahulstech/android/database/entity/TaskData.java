@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 import rahulstech.android.database.datatype.DBDate;
@@ -15,7 +16,8 @@ import rahulstech.android.database.datatype.DatatypeConverters;
 @Entity(tableName = "task_data",
         foreignKeys = {
         @ForeignKey(entity = Task.class, parentColumns = {"id"},childColumns = {"taskId"}, onDelete = ForeignKey.CASCADE)
-})
+},
+indices = @Index(value = "taskId",name = "index_task_data_taskId"))
 @SuppressWarnings("unused")
 public class TaskData {
 

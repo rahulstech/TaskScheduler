@@ -13,15 +13,19 @@ import rahulstech.android.database.dao.TaskDataDao;
 import rahulstech.android.database.datatype.DatatypeConverters;
 import rahulstech.android.database.entity.Task;
 import rahulstech.android.database.entity.TaskData;
+import rahulstech.android.database.migration.MIGRATION_1_2;
+import rahulstech.android.database.view.TaskBriefView;
 
-@Database(entities = {Task.class, TaskData.class}, version = SchedulerDB.DB_VERSION)
+@Database(entities = {Task.class, TaskData.class},
+        views = {TaskBriefView.class},
+        version = SchedulerDB.DB_VERSION)
 @TypeConverters(value = {DatatypeConverters.class},
         builtInTypeConverters = @BuiltInTypeConverters())
 public abstract class SchedulerDB extends RoomDatabase {
 
     private static final String TAG = "ScheduleDB";
 
-    static final int DB_VERSION = 1;
+    static final int DB_VERSION = 2;
 
     private static SchedulerDB mInstance = null;
 
@@ -31,7 +35,7 @@ public abstract class SchedulerDB extends RoomDatabase {
             try {
                 mInstance = Room.databaseBuilder(ctx.getApplicationContext(), SchedulerDB.class,
                                 "scheduler_db.sqlite3")
-
+                        .addMigrations(new MIGRATION_1_2())
                         .build();
             }
             catch (Throwable th) {

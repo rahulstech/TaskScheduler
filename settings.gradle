@@ -15,6 +15,5 @@ dependencyResolutionManagement {
 rootProject.name = "Task Scheduler"
 include ':app'
 include ':database'
-include ':ui'
 include ':background'
 include ':util'

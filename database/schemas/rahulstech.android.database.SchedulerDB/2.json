@@ -1,0 +1,225 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "17c863a9e1c911916a7dbac894028b28",
+    "entities": [
+      {
+        "tableName": "tasks",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `state` TEXT NOT NULL, `description` TEXT NOT NULL, `date` TEXT NOT NULL, `time` TEXT, `reminder` TEXT, `origin` INTEGER, `note` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "state",
+            "columnName": "state",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "time",
+            "columnName": "time",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "reminder",
+            "columnName": "reminder",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "origin",
+            "columnName": "origin",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "task_data",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `taskId` INTEGER NOT NULL, `type` TEXT NOT NULL, `text1` TEXT, `text2` TEXT, `text3` TEXT, `text4` TEXT, `text5` TEXT, `date1` TEXT, `date2` TEXT, `time1` TEXT, `time2` TEXT, `long1` INTEGER, `long2` INTEGER, `double1` REAL, `double2` REAL, `boolean1` INTEGER, `boolean2` INTEGER, FOREIGN KEY(`taskId`) REFERENCES `tasks`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "taskId",
+            "columnName": "taskId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "text1",
+            "columnName": "text1",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "text2",
+            "columnName": "text2",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "text3",
+            "columnName": "text3",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "text4",
+            "columnName": "text4",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "text5",
+            "columnName": "text5",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "date1",
+            "columnName": "date1",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "date2",
+            "columnName": "date2",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "time1",
+            "columnName": "time1",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "time2",
+            "columnName": "time2",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "long1",
+            "columnName": "long1",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "long2",
+            "columnName": "long2",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "double1",
+            "columnName": "double1",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "double2",
+            "columnName": "double2",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "boolean1",
+            "columnName": "boolean1",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "boolean2",
+            "columnName": "boolean2",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_task_data_taskId",
+            "unique": false,
+            "columnNames": [
+              "taskId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_task_data_taskId` ON `${TABLE_NAME}` (`taskId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "tasks",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "taskId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "views": [
+      {
+        "viewName": "tasks_brief",
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT `t1`.`id`, `t1`.`description`, `t1`.`date`,`t1`.`time`,`t1`.`reminder`, `t1`.`note`, `t2`.`origin`,`t2`.`connections`,`t2`.`rangeStart`,`t2`.`rangeEnd`,`t3`.`text4` `frequency`, `t3`.`text5` `unit`,`t3`.`long1` `interval` FROM `tasks` `t1` LEFT JOIN (SELECT CASE WHEN `origin` IS NOT NULL THEN `origin` ELSE 0 END `origin`, COUNT(`id`) `connections`, MAX(DATE(`date`)) `rangeStart`, MIN(DATE(`date`)) `rangeEnd` FROM `tasks` GROUP BY CASE WHEN `origin` IS NOT NULL THEN `origin` ELSE 0 END) `t2` ON `t1`.`id`  = `t2`.`origin` LEFT JOIN `task_data` `t3` ON `t3`.`type` = \"task_frequency\" AND `t2`.`origin` = `t3`.`taskId`"
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '17c863a9e1c911916a7dbac894028b28')"
+    ]
+  }
+}

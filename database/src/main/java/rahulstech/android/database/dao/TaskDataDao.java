@@ -20,8 +20,8 @@ public interface TaskDataDao {
     long[] insertTaskData( List<TaskData> data);
 
     @Transaction
-    @Query("SELECT * FROM `tasks` WHERE `id` = :taskId")
-    public abstract LiveData<TaskWithTaskDataModel> findLiveTaskWithTaskDataModelByTaskId(long taskId);
+    @Query("SELECT * FROM `tasks_brief` WHERE `id` = :taskId")
+    LiveData<TaskWithTaskDataModel> findLiveTaskWithTaskDataModelByTaskId(long taskId);
 
     @Transaction
     @Update

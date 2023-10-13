@@ -7,7 +7,7 @@ android {
     compileSdk 32
 
     defaultConfig {
-        minSdk 21
+        minSdk 26
         //noinspection OldTargetApi
         targetSdk 32
 
@@ -20,6 +20,10 @@ android {
             }
         }
 
+    }
+
+    sourceSets {
+        androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
     }
 
     buildTypes {

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="remind_before_choices">
+        <item>5 Minutes</item>
+        <item>10 Minutes</item>
+        <item>15 Minutes</item>
+        <item>30 Minutes</item>
+        <item>1 Hour</item>
+        <item>2 Hours</item>
+        <item>6 Hours</item>
+        <item>12 Hours</item>
+        <item>1 Day</item>
+        <item>Other</item>
+    </string-array>
+
+    <string-array name="remind_before_units">
+        <item>Minute</item>
+        <item>Hour</item>
+        <item>Day</item>
+    </string-array>
+
+    <string-array name="change_task_time_options">
+        <item>Change Time and Reminder</item>
+        <item>Remove Reminder</item>
+        <item>Remove Time</item>
+    </string-array>
+
+    <string-array name="change_task_time_start_options">
+        <item>Change Time</item>
+        <item>Remove Time</item>
+    </string-array>
+
+    <string-array name="copy_task_frequencies">
+        <item>Repeat Once</item>
+        <item>Repeat Regular Between</item>
+        <item>Repeat Selected Dates</item>
+    </string-array>
+
+    <string-array name="regular_intervals">
+        <item>Everyday</item>
+        <item>Every Week</item>
+        <item>Every Month</item>
+        <item>Every Year</item>
+        <item>Other</item>
+    </string-array>
+
+    <string-array name="interval_units">
+        <item>Days</item>
+        <item>Weeks</item>
+        <item>Months</item>
+        <item>Years</item>
+    </string-array>
+
+    <string-array name="changes_apply_to_tasks_options">
+        <item>All Tasks</item>
+        <item>Only Current Task</item>
+        <item>Future Tasks</item>
+    </string-array>
+
+    <string-array name="task_repeat_options">
+        <item>Never</item>
+        <item>Everyday</item>
+        <item>Alternate Day</item>
+        <item>Every Week</item>
+        <item>Every Two Weeks</item>
+        <item>Every Month</item>
+        <item>Every Three Months</item>
+        <item>Every Six Months</item>
+        <item>Every Year</item>
+        <item>Other</item>
+    </string-array>
+</resources>
